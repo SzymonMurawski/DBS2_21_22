@@ -68,6 +68,28 @@ namespace npgsqlIntruction
                     dataReader.Close();
                 }
 
+
+                using (NpgsqlCommand cmd = conn.CreateCommand())
+                {
+                    NpgsqlTransaction transaction = conn.BeginTransaction();
+                    cmd.Connection = conn;
+                    cmd.Transaction = transaction;
+                    try
+                    {
+                        cmd.CommandText = "INSERT INTO movies(movie_id, title, year) VALUES (102,'Ace Ventura 2', 1995)";
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "INSERT INTO movies(movie_id, title, year) VALUES (101,'Ace Ventura', 1994)";
+                        cmd.ExecuteNonQuery();
+                        transaction.Commit();
+                        Console.WriteLine("Both lines written to database");
+                    } catch (Exception ex)
+                    {
+                        Console.WriteLine("Error occured, rolling back transaction");
+                        Console.WriteLine(ex);
+                        transaction.Rollback();
+                    }
+                }
+
                 conn.Close();
             }
 
