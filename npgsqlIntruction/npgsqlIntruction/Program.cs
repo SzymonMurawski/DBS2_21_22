@@ -19,6 +19,10 @@ namespace npgsqlIntruction
             {
                 Console.WriteLine($"title: {dataReader[0]}");
             }
+            dataReader.Close();
+
+            NpgsqlCommand cmd2 = new NpgsqlCommand("DELETE FROM movies WHERE year < 1950", conn);
+            cmd2.ExecuteNonQuery();
 
             conn.Close();
         }
