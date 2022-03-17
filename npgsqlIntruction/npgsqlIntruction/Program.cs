@@ -9,22 +9,38 @@ namespace npgsqlIntruction
         {
             Console.WriteLine("Hello World!");
 
-            NpgsqlConnection conn = new NpgsqlConnection("Server=localhost;User Id=postgres;Password=pwd;Database=rental;Port=5432");
-            
-            conn.Open();
-
-            NpgsqlCommand cmd = new NpgsqlCommand("SELECT title FROM movies", conn);
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
+            using (NpgsqlConnection conn = new NpgsqlConnection("Server=localhost;User Id=postgres;Password=pwd;Database=rental;Port=5432"))
             {
-                Console.WriteLine($"title: {dataReader[0]}");
+                conn.Open();
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT title FROM movies", conn))
+                {
+                    NpgsqlDataReader dataReader = cmd.ExecuteReader();
+                    while (dataReader.Read())
+                    {
+                        Console.WriteLine($"title: {dataReader[0]}");
+                    }
+                    dataReader.Close();
+                }
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand("DELETE FROM movies WHERE year < 1950", conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT title, price, movie_id AS id FROM movies", conn))
+                {
+                    NpgsqlDataReader dataReader = cmd.ExecuteReader();
+                    while (dataReader.Read())
+                    {
+                        Console.WriteLine($"Movie {dataReader[0]} has a price of {dataReader["price"]} and has id {dataReader["id"]}");
+                    }
+                    dataReader.Close();
+                }
+
+                conn.Close();
             }
-            dataReader.Close();
 
-            NpgsqlCommand cmd2 = new NpgsqlCommand("DELETE FROM movies WHERE year < 1950", conn);
-            cmd2.ExecuteNonQuery();
-
-            conn.Close();
         }
     }
 }
