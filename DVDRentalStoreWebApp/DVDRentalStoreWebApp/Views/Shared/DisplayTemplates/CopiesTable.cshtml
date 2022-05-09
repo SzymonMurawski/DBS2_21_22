@@ -1,0 +1,26 @@
+﻿@model IEnumerable<Copy>
+
+@if (Model != null)
+{
+    <table class="table">
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Available
+            </th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </th>
+                <th>
+                    @Html.DisplayFor(modelItem => item.Available)
+                </th>
+            </tr>
+        }
+    </table>
+}
