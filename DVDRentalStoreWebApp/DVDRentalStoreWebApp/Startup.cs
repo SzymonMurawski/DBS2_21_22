@@ -1,6 +1,8 @@
+using DVDRentalStoreWebApp.DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +26,8 @@ namespace DVDRentalStoreWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddDbContext<StoreContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("RentalStoreWebApp"), o => o.SetPostgresVersion(9, 6)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

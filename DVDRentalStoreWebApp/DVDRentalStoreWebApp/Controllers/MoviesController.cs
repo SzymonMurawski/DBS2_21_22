@@ -1,6 +1,8 @@
-﻿using DVDRentalStoreWebApp.Models;
+﻿using DVDRentalStoreWebApp.DAL;
+using DVDRentalStoreWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +12,16 @@ namespace DVDRentalStoreWebApp.Controllers
 {
     public class MoviesController : Controller
     {
-        private static List<Movie> Movies = new List<Movie>
+        private readonly StoreContext _context;
+        public MoviesController(StoreContext context) // Dependency Injection
         {
-            new Movie(1, "Anchorman", 2000, 12, new List<Copy> { new Copy(1, true, 1), new Copy(2, true, 1), new Copy(3, false, 1) }),
-            new Movie(2, "Anchorman 2", 2001, 7),
-            new Movie(3, "Terminator", 1993, 22, new List<Copy> { new Copy(1, true, 1), new Copy(2, true, 1) }),
-            new Movie(4, "Jurrasic Park", 1999, 29),
-            new Movie(5, "The Lord of the Rings", 1997, 82, new List<Copy> { new Copy(1, true, 1) }),
-        };
+            _context = context;
+        }
+
         // GET: MoviesController
         public ActionResult Index(string sortOrder)
         {
-            IEnumerable<Movie> movies = Movies;
+            IEnumerable<Movie> movies = _context.Movies.Include(m => m.Copies);
             ViewBag.NextSortOrder = sortOrder == null || sortOrder == "descending" ? "ascending" : "descending";
             switch (sortOrder)
             {
@@ -40,7 +40,7 @@ namespace DVDRentalStoreWebApp.Controllers
         // GET: MoviesController/Details/5
         public ActionResult Details(int id)
         {
-            Movie movie = Movies.Find(m => m.Id == id);
+            Movie movie = _context.Movies.First(m => m.Id == id);
             return View(movie);
         }
 
@@ -57,7 +57,8 @@ namespace DVDRentalStoreWebApp.Controllers
         {
             try
             {
-                Movies.Add(movie);
+                _context.Movies.Add(movie);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -69,21 +70,23 @@ namespace DVDRentalStoreWebApp.Controllers
         // GET: MoviesController/Edit/5
         public ActionResult Edit(int id)
         {
-            Movie movie = Movies.Find(m => m.Id == id);
+            Movie movie = _context.Movies.First(m => m.Id == id);
             return View(movie);
         }
 
         // POST: MoviesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, [FromForm]Movie movie)
         {
-            Movie movie = Movies.Find(m => m.Id == id);
+            if (id != movie.Id)
+            {
+                return NotFound();
+            }
             try
             {
-                movie.Title = collection["Title"];
-                movie.Year = int.Parse(collection["Year"]);
-                movie.Price = double.Parse(collection["Price"]);
+                _context.Update(movie);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -95,7 +98,8 @@ namespace DVDRentalStoreWebApp.Controllers
         // GET: MoviesController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            Movie movie = _context.Movies.First(m => m.Id == id);
+            return View(movie);
         }
 
         // POST: MoviesController/Delete/5
@@ -103,13 +107,16 @@ namespace DVDRentalStoreWebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
+            Movie movie = _context.Movies.First(m => m.Id == id);
             try
             {
+                _context.Movies.Remove(movie);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                return View(movie);
             }
         }
     }

@@ -10,6 +10,7 @@ namespace DVDRentalStoreWebApp.Models
         public int Id { get; set; }
         public bool Available { get; set; }
         public int MovieId { get; set; }
+        public virtual Movie Movie { get; set; }
         public Copy(int id, bool available, int movieId)
         {
             Id = id;
