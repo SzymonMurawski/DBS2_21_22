@@ -35,6 +35,12 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Price)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Plot)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.TextAreaFor(model => model.Plot, 10, 100, new { @readonly = "readonly" })
+        </dd>
     </dl>
    @Html.DisplayFor(model => model.Copies, "CopiesTable")
 </div>
